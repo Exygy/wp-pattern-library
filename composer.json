@@ -1,0 +1,15 @@
+{
+    "name": "exygy/wp-pattern-library",
+    "description": "WordPress plugin for embedding a pattern library within a theme",
+    "license": "GPL2",
+    "authors": [
+        {
+            "name": "Grant Kinney",
+            "email": "grant@exygy.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "mnapoli/front-yaml": "~1.5"
+    }
+}

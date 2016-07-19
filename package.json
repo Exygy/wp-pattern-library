@@ -1,0 +1,27 @@
+{
+  "name": "wp-pattern-library",
+  "version": "1.0.0",
+  "description": "WordPress plugin for embedding a pattern library within a theme",
+  "main": "assets/scripts/wp-pattern-library.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Exygy/wp-pattern-library.git"
+  },
+  "author": "Exygy",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/Exygy/wp-pattern-library/issues"
+  },
+  "homepage": "https://github.com/Exygy/wp-pattern-library#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-csso": "^2.0.0",
+    "gulp-sass": "^2.3.2",
+    "gulp-util": "^3.0.7",
+    "webpack": "^1.13.1"
+  }
+}
