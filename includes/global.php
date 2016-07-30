@@ -56,3 +56,14 @@ function get_pattern( $pattern_type, $pattern_name, $data = [] ) {
 	// Exclude yaml from template file
 	echo eval( '?>' . $pattern->getContent() );
 }
+
+/**
+ * Helper function for svg icon markup
+ * @param  string $icon
+ */
+function get_icon( $icon ) { ?>
+<svg class="i-<?= $icon ?>">
+  <use xlink:href="#i-<?= $icon ?>"></use>
+</svg>
+<?php
+}
