@@ -67,6 +67,7 @@ class WP_Pattern_Library {
 	 * Instantiate new instance of class and register WordPress action hooks and filters.
 	 */
 	public function __construct() {
+
 		add_action( 'init', [$this, 'load_plugin_textdomain'] );
 		add_action( 'init', [$this, 'register_custom_post_types'], 20 );
 		add_action( 'init', [$this, 'create_pattern_posts'], 40 );
@@ -128,15 +129,16 @@ class WP_Pattern_Library {
 	 * This allows us to route to each group of patterns using the post (/patterns/atoms, for example).
 	 */
 	public function create_pattern_posts() {
-		// detect theme folder structure
 		$pattern_posts = [];
 		$materials_groups = [];
 
-		$materials_directories = new DirectoryIterator( $this->get_materials_directory() );
+		if ( $this->get_materials_directory() ) {
+			$materials_directories = new DirectoryIterator( $this->get_materials_directory() );
 
-		foreach ( $materials_directories as $materials_directory ) {
-			if ( $materials_directory->isDir() && ! $materials_directory->isDot() ) {
-				$materials_groups[] = $this->slug_from_filename( $materials_directory->getFilename() );
+			foreach ( $materials_directories as $materials_directory ) {
+				if ( $materials_directory->isDir() && ! $materials_directory->isDot() ) {
+					$materials_groups[] = $this->slug_from_filename( $materials_directory->getFilename() );
+				}
 			}
 		}
 
@@ -230,34 +232,41 @@ class WP_Pattern_Library {
 	 * @return void
 	 */
 	public function display_patterns( $pattern_path, $directory_level = 1 ) {
-		$patterns = new DirectoryIterator( $pattern_path );
-		$header_level = $directory_level + 1;
+		if ( $pattern_path && file_exists( $pattern_path ) ) {
+			$patterns = new DirectoryIterator( $pattern_path );
+			$header_level = $directory_level + 1;
 
-		$parser = new Mni\FrontYAML\Parser();
+			$parser = new Mni\FrontYAML\Parser();
 
-		foreach ($patterns as $pattern_file) {
-			$file_type = $pattern_file->getType();
+			foreach ($patterns as $pattern_file) {
+				$file_type = $pattern_file->getType();
 
-			if ( ! $pattern_file->isDot() ) {
-				if ( $pattern_file->isFile() ) {
-					$pattern = $parser->parse( file_get_contents( $pattern_file->getPathname() ) );
+				if ( ! $pattern_file->isDot() ) {
+					if ( $pattern_file->isFile() ) {
+						$pattern = $parser->parse( file_get_contents( $pattern_file->getPathname() ) );
 
-					$pattern_frontmatter = $pattern->getYAML();
+						$pattern_frontmatter = $pattern->getYAML();
 
-					if ( $pattern_frontmatter ) {
-						extract( $pattern_frontmatter, EXTR_SKIP );
+						if ( $pattern_frontmatter ) {
+							extract( $pattern_frontmatter, EXTR_SKIP );
+						}
+
+						// Eval the php template file into a string
+						ob_start();
+						eval( '?>' . $pattern->getContent() );
+						$pattern_template = ob_get_clean();
+
+						require( plugin_dir_path( __FILE__ ) . 'templates/patterns/pattern.php' );
+					} else if ( $pattern_file->isDir() ) {
+						require( plugin_dir_path( __FILE__ ) . 'templates/patterns/pattern-group.php' );
 					}
-
-					// Eval the php template file into a string
-					ob_start();
-					eval( '?>' . $pattern->getContent() );
-					$pattern_template = ob_get_clean();
-
-					require( plugin_dir_path( __FILE__ ) . 'templates/patterns/pattern.php' );
-				} else if ( $pattern_file->isDir() ) {
-					require( plugin_dir_path( __FILE__ ) . 'templates/patterns/pattern-group.php' );
 				}
 			}
+		} else {
+			_e(
+				sprintf( 'Error: %s is not a file or directory', $pattern_directory ),
+				'wp-pattern-library'
+			);
 		}
 	}
 
@@ -315,7 +324,8 @@ class WP_Pattern_Library {
 	 * @return string
 	 */
 	public function get_pattern_directory() {
-		return trailingslashit( get_stylesheet_directory() ) . trailingslashit( $this->theme_directory );
+		$pattern_directory = trailingslashit( get_stylesheet_directory() ) . trailingslashit( $this->theme_directory );
+		return is_dir( $pattern_directory ) ? $pattern_directory : false;
 	}
 
 	/**
@@ -324,7 +334,9 @@ class WP_Pattern_Library {
 	 * @return string
 	 */
 	public function get_materials_directory() {
-		return trailingslashit( $this->get_pattern_directory() ) . trailingslashit( $this->materials_directory );
+		$pattern_directory = $this->get_pattern_directory();
+		$materials_directory = $pattern_directory ? trailingslashit( $pattern_directory ) . trailingslashit( $this->materials_directory ) : false;
+		return $materials_directory && is_dir( $materials_directory ) ? $materials_directory : false;
 	}
 }
 
