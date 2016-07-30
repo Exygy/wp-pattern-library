@@ -68,6 +68,8 @@ class WP_Pattern_Library {
 	 */
 	public function __construct() {
 
+		if( !file_exists($this->get_materials_directory()) ) return;
+
 		add_action( 'init', [$this, 'load_plugin_textdomain'] );
 		add_action( 'init', [$this, 'register_custom_post_types'], 20 );
 		add_action( 'init', [$this, 'create_pattern_posts'], 40 );
@@ -243,7 +245,7 @@ class WP_Pattern_Library {
 
 				if ( ! $pattern_file->isDot() ) {
 					if ( $pattern_file->isFile() ) {
-						$pattern = $parser->parse( file_get_contents( $pattern_file->getPathname() ) );
+						$pattern = $parser->parse( file_get_contents( $pattern_file->getPathname() ), $parseMarkdown = false );
 
 						$pattern_frontmatter = $pattern->getYAML();
 

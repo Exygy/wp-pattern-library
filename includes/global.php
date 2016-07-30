@@ -51,14 +51,14 @@ function get_pattern( $pattern_type, $pattern_name, $data = [] ) {
 
 	$parser = new Mni\FrontYAML\Parser();
 
-	$pattern = $parser->parse( file_get_contents( wppl()->get_materials_directory() . $pattern_type . 's/' . $pattern_name . '.php' ) );
+	$pattern = $parser->parse( file_get_contents( wppl()->get_materials_directory() . $pattern_type . 's/' . $pattern_name . '.php' ), $parseMarkdown = false );
 
 	// Exclude yaml from template file
 	echo eval( '?>' . $pattern->getContent() );
 }
 
 /**
- * Helper function for svg icon markup
+ * Helper function for svg icon markup.
  * @param  string $icon
  */
 function get_icon( $icon ) { ?>
@@ -66,4 +66,26 @@ function get_icon( $icon ) { ?>
   <use xlink:href="#i-<?= $icon ?>"></use>
 </svg>
 <?php
+}
+
+/**
+ * Whether or not you are on a pattern library page.
+ * Useful for conditionally displaying content in pattern templates.
+ *
+ * @return boolean True if on a pattern library page.
+ */
+function is_pl() {
+	global $post_type;
+
+	return wppl()->post_type == $post_type && ! is_admin() ? false : true;
+}
+
+/**
+ * Whether or not you are on a pattern library page.
+ * Useful for conditionally displaying content in pattern templates.
+ *
+ * @return boolean False if on a pattern library page.
+ */
+function is_not_pl() {
+	return ! is_pl();
 }
