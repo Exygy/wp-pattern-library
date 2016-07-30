@@ -47,6 +47,12 @@ class WP_Pattern_Library {
 	public $materials_directory = 'materials';
 
 	/**
+	 * Instance of
+	 * @var \Mni\FrontYAML\Parser
+	 */
+	protected $parser;
+
+	/**
 	 * Singleton pattern: instantiate one and only one instance of this class, and one and
 	 * only one instance of each child class that extends it.
 	 *
@@ -68,7 +74,7 @@ class WP_Pattern_Library {
 	 */
 	public function __construct() {
 
-		if( !file_exists($this->get_materials_directory()) ) return;
+		$this->parser = new \Mni\FrontYAML\Parser();
 
 		add_action( 'init', [$this, 'load_plugin_textdomain'] );
 		add_action( 'init', [$this, 'register_custom_post_types'], 20 );
@@ -238,25 +244,13 @@ class WP_Pattern_Library {
 			$patterns = new DirectoryIterator( $pattern_path );
 			$header_level = $directory_level + 1;
 
-			$parser = new Mni\FrontYAML\Parser();
-
 			foreach ($patterns as $pattern_file) {
 				$file_type = $pattern_file->getType();
 
 				if ( ! $pattern_file->isDot() ) {
 					if ( $pattern_file->isFile() ) {
-						$pattern = $parser->parse( file_get_contents( $pattern_file->getPathname() ), $parseMarkdown = false );
 
-						$pattern_frontmatter = $pattern->getYAML();
-
-						if ( $pattern_frontmatter ) {
-							extract( $pattern_frontmatter, EXTR_SKIP );
-						}
-
-						// Eval the php template file into a string
-						ob_start();
-						eval( '?>' . $pattern->getContent() );
-						$pattern_template = ob_get_clean();
+						$pattern_template = $this->eval_pattern( file_get_contents( $pattern_file->getPathname() ) );
 
 						require( plugin_dir_path( __FILE__ ) . 'templates/patterns/pattern.php' );
 					} else if ( $pattern_file->isDir() ) {
@@ -270,6 +264,27 @@ class WP_Pattern_Library {
 				'wp-pattern-library'
 			);
 		}
+	}
+
+	/**
+	 * Evaluate a pattern (process php) and return a string of markup.
+	 *
+	 * @param  string $pattern      Contents of a pattern template before processing php.
+	 * @param  array  $pattern_data Template data used to override defaults of template variables.
+	 * @return string               Contents of a patter template after processing php.
+	 */
+	public function eval_pattern( $pattern, $pattern_data = [] ) {
+		$parsed_pattern = $this->parser->parse( $pattern, $parseMarkdown = false );
+
+		$pattern_content = $parsed_pattern->getContent();
+
+		$pattern_frontmatter = $parsed_pattern->getYAML();
+
+		ob_start();
+		eval( '$process_pattern = function() use ($pattern_data, $pattern_frontmatter) { if ( $pattern_frontmatter ) { extract( $pattern_data ); extract( $pattern_frontmatter, EXTR_SKIP ); } ?>' . $pattern_content . '<?php }; $process_pattern();' );
+		$pattern_template = ob_get_clean();
+
+		return $pattern_template;
 	}
 
 	/**

@@ -47,14 +47,7 @@ function display_patterns( $pattern_type ) {
  * @param  array $data         	Array of template data to extract.
  */
 function get_pattern( $pattern_type, $pattern_name, $data = [] ) {
-	extract( $data );
-
-	$parser = new Mni\FrontYAML\Parser();
-
-	$pattern = $parser->parse( file_get_contents( wppl()->get_materials_directory() . $pattern_type . 's/' . $pattern_name . '.php' ), $parseMarkdown = false );
-
-	// Exclude yaml from template file
-	echo eval( '?>' . $pattern->getContent() );
+	echo wppl()->eval_pattern( file_get_contents( wppl()->get_materials_directory() . $pattern_type . 's/' . $pattern_name . '.php' ), $data );
 }
 
 /**
@@ -77,7 +70,7 @@ function get_icon( $icon ) { ?>
 function is_pl() {
 	global $post_type;
 
-	return wppl()->post_type == $post_type && ! is_admin() ? false : true;
+	return wppl()->post_type == $post_type && ! is_admin() ? true : false;
 }
 
 /**
