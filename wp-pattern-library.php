@@ -2,7 +2,7 @@
 /*
  * Plugin Name: Pattern Library
  * Description: Automatically generate a pattern library with in WordPress.
- * Version: 1.1
+ * Version: 1.1.1
  * Author: Exygy
  * Author URI: http://exygy.com
  * License: GPL-2.0+
