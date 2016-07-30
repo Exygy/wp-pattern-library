@@ -21,7 +21,7 @@ function wppl() {
  * @return string
  */
 function get_pattern_directory() {
-	wppl()->get_pattern_directory();
+	return wppl()->get_pattern_directory();
 }
 
 /**
