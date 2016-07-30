@@ -393,7 +393,7 @@ class WP_Pattern_Library {
 		 *
 		 * @param string $icon_path Absolute directory path of icon svg file
 		 */
-		$icon_path = apply_filters( 'wppl_icon_file', $this->get_pattern_directory() . $this->icon_file );
+		$icon_path = apply_filters( 'wppl_icon_path', $this->get_pattern_directory() . $this->icon_file );
 
 		return file_exists( $icon_path ) ? $icon_path : false;
 	}

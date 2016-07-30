@@ -17,6 +17,14 @@ function wppl() {
 }
 
 /**
+ * Return an absolute path to the pattern directory within the active theme
+ * @return string
+ */
+function get_pattern_directory() {
+	wppl()->get_pattern_directory();
+}
+
+/**
  * Load pattern library header template.
  */
 function get_pattern_header() {
