@@ -47,6 +47,12 @@ class WP_Pattern_Library {
 	public $materials_directory = 'materials';
 
 	/**
+	 * Name of icons svg file with pattern library theme directory
+	 * @var string
+	 */
+	public $icon_file = 'icons.svg';
+
+	/**
 	 * Instance of
 	 * @var \Mni\FrontYAML\Parser
 	 */
@@ -80,6 +86,7 @@ class WP_Pattern_Library {
 		add_action( 'init', [$this, 'register_custom_post_types'], 20 );
 		add_action( 'init', [$this, 'create_pattern_posts'], 40 );
 		add_action( 'wp_enqueue_scripts', [$this, 'enqueue_assets'] );
+		add_action( 'wppl_body', [$this, 'svg_icons'] );
 		add_filter( 'archive_template', [$this, 'archive_template'] );
 		add_filter( 'single_template', [$this, 'single_template'] );
 	}
@@ -197,6 +204,17 @@ class WP_Pattern_Library {
 			wp_enqueue_style( 'fabricator-style', $asset_uri . 'styles/fabricator.css', [], filemtime( $asset_dir . 'styles/fabricator.css' ), 'all' );
 
 			wp_enqueue_script( 'fabricator-script', $asset_uri . 'scripts/fabricator.js', [], filemtime( $asset_dir . 'scripts/fabricator.js' ), true );
+		}
+	}
+
+	/**
+	 * Output svg icons just after the <body> tag
+	 */
+	public function svg_icons() {
+		include_once plugin_dir_path( __FILE__ ) . 'templates/parts/icons.svg';
+
+		if ( $this->get_icon_path() ) {
+			include_once( $this->get_icon_path() );
 		}
 	}
 
@@ -363,6 +381,21 @@ class WP_Pattern_Library {
 		$pattern_directory = $this->get_pattern_directory();
 		$materials_directory = $pattern_directory ? trailingslashit( $pattern_directory ) . trailingslashit( $this->materials_directory ) : false;
 		return $materials_directory && is_dir( $materials_directory ) ? $materials_directory : false;
+	}
+
+	/**
+	 * Return filtered svg icon path.
+	 * @return string
+	 */
+	public function get_icon_path() {
+		/**
+		 * Filter the icon path within a theme's pattern library folder.
+		 *
+		 * @param string $icon_path Absolute directory path of icon svg file
+		 */
+		$icon_path = apply_filters( 'wppl_icon_file', $this->get_pattern_directory() . $this->icon_file );
+
+		return file_exists( $icon_path ) ? $icon_path : false;
 	}
 }
 

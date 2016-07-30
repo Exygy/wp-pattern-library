@@ -31,6 +31,20 @@ function get_pattern_footer() {
 }
 
 /**
+ * Loads pattern library menu
+ */
+function get_pattern_menu() {
+	load_template( plugin_dir_path( __FILE__ ) . '../templates/parts/menu.php', true );
+}
+
+/**
+ * Load content just after the opening <body> tag
+ */
+function wppl_body() {
+	do_action( 'wppl_body' );
+}
+
+/**
  * Output all patterns within the specified pattern group (Ex: atoms, molecules, or organisms).
  *
  * @param  string $pattern_type

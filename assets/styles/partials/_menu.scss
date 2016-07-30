@@ -17,6 +17,10 @@
 		transform: translate(0, 0);
 	}
 
+	&.with-admin-bar {
+		top: 32px;
+	}
+
 	ul {
 		margin-top: 0;
 		margin-bottom: 0;
