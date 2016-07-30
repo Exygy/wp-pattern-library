@@ -43,9 +43,52 @@ Let's use a simple example based on the [Pattern Lab](http://patternlab.io/) str
 
 You've built our your patterns. Now use those templates in your custom theme.
 
-		get_pattern('atom', 'button', ['text' => 'Submit']);
+	get_pattern( 'atom', 'button', ['text' => 'Submit'] );
 
 This will load your pattern from within a theme template file. The third argument is an array of data to load into the variables specified in your pattern.
+
+### SVG Icons
+
+Output svg icons markup
+
+	<?php get_icon( 'search' ); ?>
+
+	<svg class="i-<?= $icon ?>">
+		<use xlink:href="#i-search"></use>
+	</svg>
+
+Include an `icons.svg` in the `pattern-library/` directory of your theme--it will be loaded on pattern library pages.
+
+Add a filter `wppl_icon_path` to change which file to load.
+
+	add_filter( 'wppl_icon_path', 'my_icon_path' );
+
+	function my_icon_path( $icon_file ) {
+		$theme_icon_file = trailingslashit( get_stylesheet_directory() ) . 'pattern-library/icons/icomoon/symbol-defs.svg';
+
+		if ( file_exists( $theme_icon_file ) ) {
+			$icon_file = $theme_icon_file;
+		}
+
+		return $icon_file;
+	}
+
+You will still need to include this file in the header of your theme:
+
+	<?php if ( function_exists( 'wppl' ) && file_exists( get_pattern_directory() . 'icons/icomoon/symbol-defs.svg' ) ) {
+		include_once( get_pattern_directory() . 'icons/icomoon/symbol-defs.svg' );
+	} ?>
+
+### Helper functions
+
+Whether or not you are on the pattern library page
+
+	is_pl() // returns true if you are on /patterns, false if not
+	is_not_pl() // returns false if you are on /patterns, true if not
+
+The [Illuminate support package](https://laravel.com/docs/5.1/helpers) is included for string and array helpers. For example, using `str_slug` to convert a title into an id
+
+	<a href="#<?= esc_attr( str_slug( $title ) ) ?>"><?= $title ?></a>
 
 
 ## Development
