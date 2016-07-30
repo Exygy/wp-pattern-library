@@ -331,7 +331,7 @@ class WP_Pattern_Library {
 	 * @return string
 	 */
 	public function slug_from_filename( $filename ) {
-		return explode('.', $filename)[0];
+		return str_slug( explode( '.', $filename )[0] );
 	}
 
 	/**

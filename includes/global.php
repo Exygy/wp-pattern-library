@@ -69,7 +69,7 @@ function display_patterns( $pattern_type ) {
  * @param  array $data         	Array of template data to extract.
  */
 function get_pattern( $pattern_type, $pattern_name, $data = [] ) {
-	echo wppl()->eval_pattern( file_get_contents( wppl()->get_materials_directory() . $pattern_type . 's/' . $pattern_name . '.php' ), $data );
+	echo wppl()->eval_pattern( file_get_contents( wppl()->get_materials_directory() . str_plural( $pattern_type ) . '/' . $pattern_name . '.php' ), $data );
 }
 
 /**
