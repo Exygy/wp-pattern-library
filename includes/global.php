@@ -68,9 +68,7 @@ function get_icon( $icon ) { ?>
  * @return boolean True if on a pattern library page.
  */
 function is_pl() {
-	global $post_type;
-
-	return wppl()->post_type == $post_type && ! is_admin() ? true : false;
+	return wppl()->is_pattern_post_type() && ! is_admin() ? true : false;
 }
 
 /**

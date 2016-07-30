@@ -137,47 +137,48 @@ class WP_Pattern_Library {
 	 * This allows us to route to each group of patterns using the post (/patterns/atoms, for example).
 	 */
 	public function create_pattern_posts() {
-		$pattern_posts = [];
-		$materials_groups = [];
+		if ( $this->is_pattern_post_type() ) {
+			$pattern_posts = [];
+			$materials_groups = [];
 
-		if ( $this->get_materials_directory() ) {
-			$materials_directories = new DirectoryIterator( $this->get_materials_directory() );
+			if ( $this->get_materials_directory() ) {
+				$materials_directories = new DirectoryIterator( $this->get_materials_directory() );
 
-			foreach ( $materials_directories as $materials_directory ) {
-				if ( $materials_directory->isDir() && ! $materials_directory->isDot() ) {
-					$materials_groups[] = $this->slug_from_filename( $materials_directory->getFilename() );
+				foreach ( $materials_directories as $materials_directory ) {
+					if ( $materials_directory->isDir() && ! $materials_directory->isDot() ) {
+						$materials_groups[] = $this->slug_from_filename( $materials_directory->getFilename() );
+					}
 				}
 			}
-		}
 
-		foreach( get_posts( ['post_type' => $this->post_type, 'posts_per_page' => 500 ] ) as $pattern_post ) {
-			$pattern_posts[] = $pattern_post->post_name;
-		}
-
-		$pattern_posts_to_create = array_diff( $materials_groups, $pattern_posts );
-		$pattern_posts_to_delete = array_diff(  $pattern_posts, $materials_groups );
-
-		if ( $pattern_posts_to_create ) {
-			foreach ( $pattern_posts_to_create as $post_name ) {
-				var_dump($post_name);
-				wp_insert_post([
-					'post_title'  => $this->titleize($post_name),
-					'post_status' => 'publish',
-					'post_name'   => $post_name,
-					'post_type'   => $this->post_type,
-				]);
+			foreach( get_posts( ['post_type' => $this->post_type, 'posts_per_page' => 500 ] ) as $pattern_post ) {
+				$pattern_posts[] = $pattern_post->post_name;
 			}
-		}
 
-		if ( $pattern_posts_to_delete ) {
-			foreach ( $pattern_posts_to_delete as $post_name ) {
-				$post_to_delete = get_posts([
-					'post_type' => $this->post_type,
-					'post_name__in' => [$post_name],
-				])[0];
+			$pattern_posts_to_create = array_diff( $materials_groups, $pattern_posts );
+			$pattern_posts_to_delete = array_diff(  $pattern_posts, $materials_groups );
 
-				if ( $post_to_delete ) {
-					wp_delete_post( $post_to_delete->ID, true );
+			if ( $pattern_posts_to_create ) {
+				foreach ( $pattern_posts_to_create as $post_name ) {
+					wp_insert_post([
+						'post_title'  => $this->titleize($post_name),
+						'post_status' => 'publish',
+						'post_name'   => $post_name,
+						'post_type'   => $this->post_type,
+					]);
+				}
+			}
+
+			if ( $pattern_posts_to_delete ) {
+				foreach ( $pattern_posts_to_delete as $post_name ) {
+					$post_to_delete = get_posts([
+						'post_type' => $this->post_type,
+						'post_name__in' => [$post_name],
+					])[0];
+
+					if ( $post_to_delete ) {
+						wp_delete_post( $post_to_delete->ID, true );
+					}
 				}
 			}
 		}
@@ -188,7 +189,8 @@ class WP_Pattern_Library {
 	 */
 	public function enqueue_assets() {
 		global $post_type;
-		if ( ( is_single() && $this->post_type === $post_type ) || is_post_type_archive( $this->post_type ) ) {
+
+		if ( ( is_single() && $this->is_pattern_post_type() ) || is_post_type_archive( $this->post_type ) ) {
 			$asset_uri = plugin_dir_url( __FILE__ ) . 'assets/';
 			$asset_dir = plugin_dir_path( __FILE__ ) . 'assets/';
 
@@ -205,9 +207,7 @@ class WP_Pattern_Library {
 	 * @return string
 	 */
 	public function archive_template( $archive_template ) {
-		global $post_type;
-
-		if ( $this->post_type == $post_type ) {
+		if ( $this->is_pattern_post_type() ) {
 			$archive_template = plugin_dir_path( __FILE__ ) . 'templates/archive.php';
 		}
 
@@ -221,13 +221,22 @@ class WP_Pattern_Library {
 	 * @return string
 	 */
 	public function single_template( $single_template ) {
-		global $post_type;
-
-		if ( $this->post_type == $post_type ) {
+		if ( $this->is_pattern_post_type() ) {
 			$single_template = plugin_dir_path( __FILE__ ) . 'templates/single.php';
 		}
 
 		return $single_template;
+	}
+
+	/**
+	 * If the global post type is the pattern library post type.
+	 *
+	 * @return boolean
+	 */
+	public function is_pattern_post_type() {
+		global $post_type;
+
+		return $this->post_type == $post_type ? true : false;
 	}
 
 	/**
@@ -260,7 +269,7 @@ class WP_Pattern_Library {
 			}
 		} else {
 			_e(
-				sprintf( 'Error: %s is not a file or directory', $pattern_directory ),
+				sprintf( 'Error: %s is not a file or directory', $pattern_path ),
 				'wp-pattern-library'
 			);
 		}
