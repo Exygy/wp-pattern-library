@@ -10,6 +10,7 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "mnapoli/front-yaml": "~1.5"
+        "mnapoli/front-yaml": "~1.5",
+        "illuminate/support": "~5.2"
     }
 }
