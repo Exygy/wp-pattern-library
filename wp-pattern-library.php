@@ -2,7 +2,7 @@
 /*
  * Plugin Name: Pattern Library
  * Description: Automatically generate a pattern library with in WordPress.
- * Version: 1.1.2
+ * Version: 1.1.3
  * Author: Exygy
  * Author URI: http://exygy.com
  * License: GPL-2.0+
@@ -420,10 +420,6 @@ add_action( 'admin_init', function () {
 
 	if ( ! class_exists('WP_GitHub_Updater') ) {
 		include_once( plugin_dir_path( __FILE__ ) . 'WordPress-GitHub-Plugin-Updater/updater.php' );
-	}
-
-	if ( ! defined( 'WP_GITHUB_FORCE_UPDATE' ) ) {
-		define( 'WP_GITHUB_FORCE_UPDATE', true );
 	}
 
 	$config = array(
